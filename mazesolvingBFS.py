@@ -211,38 +211,42 @@ def scanAdjacent(mazeVisit2, i, j, step_number, row, column):
                 stack.append(4)
     return stack
 
-fullImage = cv2.imread('C:\Users\ERTS\Documents\images\maze10.jpg')
-gray_image = cv2.cvtColor(fullImage, cv2.COLOR_BGR2GRAY)
-ret,binaryImage = cv2.threshold(gray_image,127,255,cv2.THRESH_BINARY)
-breadth = len(binaryImage)
-length = len(binaryImage[0])
-maze = np.zeros((breadth/20, length/20),np.uint8)
-mazeVisit = np.ones((breadth/20, length/20),np.uint8)
-mazeVisit2 = np.ones((breadth/20, length/20),np.uint8)*(-1)
-maze = constructMazeArray(maze, binaryImage, length, breadth)
+fullImage = cv2.imread('C:\Users\ERTS\Documents\images\maze.jpg') # Acquire image from disk.
+gray_image = cv2.cvtColor(fullImage, cv2.COLOR_BGR2GRAY)                       # Convert to gray image
+ret,binaryImage = cv2.threshold(gray_image,127,255,cv2.THRESH_BINARY)          # Set thresholds to convert it to pure binary image.
+breadth = len(binaryImage)                                                     # Acquire breadth of image
+length = len(binaryImage[0])                                                   # Acquire length of image
 
-start_i = 0
-start_j = 0
-stop_i = 30
-stop_j = 60
-pos_i = start_i
+maze = np.zeros((breadth/20, length/20),np.uint8)                              # Initialise maze array with all zeros ( Maze array contains information about all
+                                                                               # the walls in the maze)
+mazeVisit = np.ones((breadth/20, length/20),np.uint8)                          # Initialise mazeVisit array with all ones ( A '1' is stored in a particular location
+                                                                               # if that cell is unvisited. A '0' is stored if it is visited)
+mazeVisit2 = np.ones((breadth/20, length/20),np.uint8)*(-1)                    # Initialise mazeVisit2 array with all -1 ( Array stores the number of steps needed to
+                                                                               # traverse to that cell from initial cell ).
+maze = constructMazeArray(maze, binaryImage, length, breadth)                  # Build maze array by processing image
+
+start_i = input(" Enter start_i (0 - breadth-1) : ")
+start_j = input(" Enter start_j (0 - length-1) : ")
+stop_i = input(" Enter stop_i (0 - breadth-1) : ")
+stop_j = input(" Enter stop_i (0 - length-1) : ")
+pos_i = start_i       # Variables to keep track of position in array initialised at starting cell.
 pos_j = start_j
+mazeVisit[pos_i, pos_j] = 0    # Set mazeVisit for starting cell as 0
+step_counter = 0               # Set number of steps counted to 0
+mazeVisit2[pos_i, pos_j] = step_counter   # Set mazeVisit2 for starting cell as 0
 
-mazeVisit[pos_i, pos_j] = 0
-step_counter = 0
-mazeVisit2[pos_i, pos_j] = step_counter
-
-while mazeVisit[stop_i - 1, stop_j - 1] != 0:
-    for i in range(stop_i):
-        for j in range(stop_j):
+while mazeVisit[stop_i, stop_j] != 0:                                 # BFS algorithm loop
+    for i in range(breadth/20):
+        for j in range(length/20):
             if mazeVisit2[i, j] == step_counter:
                 labelAdjacent(maze, mazeVisit, mazeVisit2, i, j, step_counter)
     step_counter += 1
 
-pos_i = stop_i - 1
-pos_j = stop_j - 1
+pos_i = stop_i
+pos_j = stop_j
 step = mazeVisit2[pos_i, pos_j]
 tempMazeVisit2 = mazeVisit2
+
 myList = LinkedList()
 myList.add((pos_i,pos_j),step)
 while step != 0:##pos_i != start_i and pos_j != start_j:
@@ -288,4 +292,4 @@ cv2.imwrite('C:\Users\ERTS\Documents\images\maze10by10\maze55.jpg', binaryImage)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
 
-    
+
