@@ -58,6 +58,14 @@ class LinkedList(object):
             print this_node.get_pos()
             print this_node.get_step()
             this_node = this_node.get_next()
+    def colour(self, img):
+        this_node = self.root
+        while this_node:
+            pos_i, pos_j = this_node.get_pos()
+            image = colourCell(img, pos_i, pos_j)
+            this_node = this_node.get_next()
+        return image
+
 
 def viewCell(image, row, column):
     temp1 = row*20
@@ -139,7 +147,7 @@ def labelAdjacent(maze, mazeVisit, mazeVisit2, i, j, step_counter):
                 mazeVisit[i, j-1] = 0
     return 0
             
-def scanAdjacent(mazeVisit2, i, j, step_number):
+def scanAdjacent(mazeVisit2, i, j, step_number, row, column):
     stack = []
     if i == 0:
         if j == 0:
@@ -147,7 +155,7 @@ def scanAdjacent(mazeVisit2, i, j, step_number):
                 stack.append(2)
             if mazeVisit2[i+1,j] == step_number-1:
                 stack.append(3)
-        elif j == 9:
+        elif j == column - 1:
             if mazeVisit2[i,j-1] == step_number-1:
                 stack.append(4)
             if mazeVisit2[i+1,j] == step_number-1:
@@ -159,13 +167,13 @@ def scanAdjacent(mazeVisit2, i, j, step_number):
                 stack.append(2)
             if mazeVisit2[i+1,j] == step_number-1:
                 stack.append(3)
-    elif i == 9:
+    elif i == row - 1:
         if j == 0:
             if mazeVisit2[i,j+1] == step_number-1:
                 stack.append(2)
             if mazeVisit2[i-1,j] == step_number-1:
                 stack.append(1)
-        elif j == 9:
+        elif j == column - 1:
             if mazeVisit2[i,j-1] == step_number-1:
                 stack.append(4)
             if mazeVisit2[i-1,j] == step_number-1:
@@ -185,7 +193,7 @@ def scanAdjacent(mazeVisit2, i, j, step_number):
                 stack.append(2)
             if mazeVisit2[i+1,j] == step_number-1:
                 stack.append(3)
-        elif j == 9:
+        elif j == column - 1:
             if mazeVisit2[i-1,j] == step_number-1:
                 stack.append(1)
             if mazeVisit2[i,j-1] == step_number-1:
@@ -203,7 +211,7 @@ def scanAdjacent(mazeVisit2, i, j, step_number):
                 stack.append(4)
     return stack
 
-fullImage = cv2.imread('C:\Users\ERTS\Documents\images\maze01.jpg')
+fullImage = cv2.imread('C:\Users\ERTS\Documents\images\maze10.jpg')
 gray_image = cv2.cvtColor(fullImage, cv2.COLOR_BGR2GRAY)
 ret,binaryImage = cv2.threshold(gray_image,127,255,cv2.THRESH_BINARY)
 breadth = len(binaryImage)
@@ -215,8 +223,8 @@ maze = constructMazeArray(maze, binaryImage, length, breadth)
 
 start_i = 0
 start_j = 0
-stop_i = 20
-stop_j = 20
+stop_i = 30
+stop_j = 60
 pos_i = start_i
 pos_j = start_j
 
@@ -237,8 +245,8 @@ step = mazeVisit2[pos_i, pos_j]
 tempMazeVisit2 = mazeVisit2
 myList = LinkedList()
 myList.add((pos_i,pos_j),step)
-while pos_i != start_i and pos_j != start_j:
-    tempStack = scanAdjacent(tempMazeVisit2, pos_i, pos_j, step)
+while step != 0:##pos_i != start_i and pos_j != start_j:
+    tempStack = scanAdjacent(tempMazeVisit2, pos_i, pos_j, step, breadth/20, length/20)
     if len(tempStack) == 1:
         temp = tempStack.pop()
         if temp == 1:
@@ -256,22 +264,28 @@ while pos_i != start_i and pos_j != start_j:
     else:
         while len(tempStack) != 0:
             temp = tempStack.pop()
-            if temp == 1:
-                
-            elif temp == 2:
-                
-            elif temp == 3:
-                
-            elif temp == 4:
-                
-            else:
-                x= 3
+            check = movePossibility(maze,pos_i,pos_j)
+            if (temp in check):
+                if temp == 1:
+                    pos_i -= 1
+                elif temp == 2:
+                    pos_j += 1
+                elif temp == 3:
+                    pos_i += 1
+                elif temp == 4:
+                    pos_j -= 1
+                else:
+                    x= 3
+                break
+        step = step - 1
+        myList.add((pos_i, pos_j), step)
         
 
-myList = LinkedList()
-myList.add((24,24),24)
-myList.add((12,32),23)
-myList.add((11,32),22)
-myList.print_list()
+
+myList.colour(binaryImage)
+cv2.imshow('canvas', binaryImage)
+cv2.imwrite('C:\Users\ERTS\Documents\images\maze10by10\maze55.jpg', binaryImage)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 
     
